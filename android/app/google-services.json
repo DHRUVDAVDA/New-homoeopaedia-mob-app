@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "969302891998",
+    "project_id": "homoeopaedia-d2a06",
+    "storage_bucket": "homoeopaedia-d2a06.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:969302891998:android:a4481f3ed76f02b1ed114f",
+        "android_client_info": {
+          "package_name": "com.homoeopaedia"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAM0YQStPp_bnI238zyAOHHic7tTs1kKX4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

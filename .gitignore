@@ -1,0 +1,25 @@
+# Node modules
+node_modules/
+
+# Expo files (optional, if using Expo)
+.expo/
+.expo-shared/
+
+# Android build files
+android/.kotlin/errors/
+android/app/build/
+android/.gradle/
+android/.idea/
+android/local.properties
+
+# iOS build files (if applicable)
+ios/Pods/
+ios/build/
+
+# macOS system files
+__MACOSX/
+.DS_Store
+
+# Logs and temporary files
+*.log
+*.lock
