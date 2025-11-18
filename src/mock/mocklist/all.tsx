@@ -5,8 +5,15 @@ import axios from "axios";
 import moment from "moment";
 import { uniqBy } from "lodash";
 import Toast from "react-native-simple-toast";
-import styles from '../Styles';
-import { FlatList, Text, View, TouchableOpacity, Platform, BackHandler } from "react-native";
+import styles from "../Styles";
+import {
+  FlatList,
+  Text,
+  View,
+  TouchableOpacity,
+  Platform,
+  BackHandler,
+} from "react-native";
 import Loading from "../../layout/Loading";
 import InputSearchAPI from "../../components/InputSearchAPI";
 import { Feather, EvilIcons, AntDesign } from "@expo/vector-icons";
@@ -24,7 +31,7 @@ const All = React.memo(({ navigation, user, token }: MyProps) => {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [nextPageUrl, setNextPageUrl] = useState(null);
 
-  const tab = 'All';
+  const tab = "All";
 
   // Fetch mock tests
   const getMock = async (url = null, searchKey = "") => {
@@ -36,7 +43,7 @@ const All = React.memo(({ navigation, user, token }: MyProps) => {
     }
 
     let searchText = searchKey ? `&search=${searchKey}` : "";
-    
+
     // If it's a new search, reset list
     if (!url) {
       setAllList([]);
@@ -46,14 +53,18 @@ const All = React.memo(({ navigation, user, token }: MyProps) => {
     try {
       const apiUrl = url
         ? `${url}&api_token=${token}${searchText}`
-        : `${BASE_URL}/mock/${user.user_id}/${tab}?api_token=${token}&created_at=${moment().format("YYYY-MM-DD HH:mm:ss")}${searchText}`;
+        : `${BASE_URL}/mock/${
+            user.user_id
+          }/${tab}?api_token=${token}&created_at=${moment().format(
+            "YYYY-MM-DD HH:mm:ss"
+          )}${searchText}`;
 
       console.log("Fetching from URL:", apiUrl);
 
       const res = await axios.get(apiUrl);
-      
+
       if (res.data?.result?.data) {
-        setAllList(prev => uniqBy([...prev, ...res.data.result.data], "id"));
+        setAllList((prev) => uniqBy([...prev, ...res.data.result.data], "id"));
         setNextPageUrl(res.data.result.next_page_url);
       }
     } catch (error) {
@@ -91,47 +102,78 @@ const All = React.memo(({ navigation, user, token }: MyProps) => {
   };
 
   // Render each mock test
-  const renderMock = useCallback(({ item }) => (
-    <View style={[styles.boxContainer, styles.singleList]}>
-      <View style={{ flexShrink: 1 }}>
-        <View style={[styles.lastItemList, styles.mb5]}>
-          {item.qcount > 0 && <Text style={styles.subheadingQues}>{item.qcount} Ques</Text>}
-          {item.mode === 2 && <Text style={styles.comingSoon}>COMING SOON</Text>}
-        </View>
-        <Text style={styles.heading}>{item.name}</Text>
-        <View style={styles.lastItemList}>
-          <AntDesign name="play" size={16} color="#22bdc1" style={styles.mr5} />
-          <Text style={styles.subheading}>{item.duration} Mins</Text>
-        </View>
-      </View>
-      <View style={styles.icons}>
-        {item.ccount > 0 && item.status === "Completed" && (
-          <TouchableOpacity onPress={() => reAttempt(item)}>
-            <AntDesign name="reload1" size={16} color="#ffffff" style={[styles.startTrophy, styles.mr10]} />
-          </TouchableOpacity>
-        )}
-        {item.qcount > 0 && (
-          <TouchableOpacity onPress={() => startOrReview(item)}>
-            {item.ccount > 0 && item.status === "Completed" ? (
-              <EvilIcons name="trophy" size={22} color="#ffffff" style={styles.startTrophy} />
-            ) : (
-              <Feather name="arrow-right" size={22} color="#ffffff" style={styles.startArrow} />
+  const renderMock = useCallback(
+    ({ item }) => (
+      <View style={[styles.boxContainer, styles.singleList]}>
+        <View style={{ flexShrink: 1 }}>
+          <View style={[styles.lastItemList, styles.mb5]}>
+            {item.qcount > 0 && (
+              <Text style={styles.subheadingQues}>{item.qcount} Ques</Text>
             )}
-          </TouchableOpacity>
-        )}
+            {item.mode === 2 && (
+              <Text style={styles.comingSoon}>COMING SOON</Text>
+            )}
+          </View>
+          <Text style={styles.heading}>{item.name}</Text>
+          <View style={styles.lastItemList}>
+            <AntDesign
+              name="play-circle"
+              size={16}
+              color="#22bdc1"
+              style={styles.mr5}
+            />
+            <Text style={styles.subheading}>{item.duration} Mins</Text>
+          </View>
+        </View>
+        <View style={styles.icons}>
+          {item.ccount > 0 && item.status === "Completed" && (
+            <TouchableOpacity onPress={() => reAttempt(item)}>
+              <AntDesign
+                name="reload"
+                size={16}
+                color="#ffffff"
+                style={[styles.startTrophy, styles.mr10]}
+              />
+            </TouchableOpacity>
+          )}
+          {item.qcount > 0 && (
+            <TouchableOpacity onPress={() => startOrReview(item)}>
+              {item.ccount > 0 && item.status === "Completed" ? (
+                <EvilIcons
+                  name="trophy"
+                  size={22}
+                  color="#ffffff"
+                  style={styles.startTrophy}
+                />
+              ) : (
+                <Feather
+                  name="arrow-right"
+                  size={22}
+                  color="#ffffff"
+                  style={styles.startArrow}
+                />
+              )}
+            </TouchableOpacity>
+          )}
+        </View>
       </View>
-    </View>
-  ), []);
+    ),
+    []
+  );
 
   // Handle re-attempt
   const reAttempt = async (item) => {
-    console.log("reAttempt")
+    console.log("reAttempt");
     setLoading(true);
     try {
-      const res = await axios.get(`${BASE_URL}/checksubscription/${user.user_id}/${item.id}?api_token=${token}`);
-console.log("check sub response", res)
+      const res = await axios.get(
+        `${BASE_URL}/checksubscription/${user.user_id}/${item.id}?api_token=${token}`
+      );
+      console.log("check sub response", res);
       if (res.data.success) {
-        await axios.get(`${BASE_URL}/mreattempt/${item.id}/${user.user_id}?api_token=${token}`);
+        await axios.get(
+          `${BASE_URL}/mreattempt/${item.id}/${user.user_id}?api_token=${token}`
+        );
         setLoading(false);
         navigation.navigate("StartMock", item);
       } else {
@@ -146,14 +188,19 @@ console.log("check sub response", res)
 
   // Handle start or review
   const startOrReview = async (item) => {
-    console.log("startOrReview")
+    console.log("startOrReview");
     setLoading(true);
     try {
-      const res = await axios.get(`${BASE_URL}/checksubscription/${user.user_id}/${item.id}?api_token=${token}`);
+      const res = await axios.get(
+        `${BASE_URL}/checksubscription/${user.user_id}/${item.id}?api_token=${token}`
+      );
 
       if (res.data.success) {
         if (item.ccount === 0 || item.status !== "Completed") {
-          navigation.navigate(item.status === "" ? "Instructions" : "StartMock", item);
+          navigation.navigate(
+            item.status === "" ? "Instructions" : "StartMock",
+            item
+          );
         } else {
           navigation.navigate("MockResult", item);
         }
@@ -170,7 +217,11 @@ console.log("check sub response", res)
   return (
     <View style={styles.content}>
       <Loading loading={loading} text="Loading contents. Please wait." />
-      <InputSearchAPI search={search} setSearch={setSearch} startSearch={startSearch} />
+      <InputSearchAPI
+        search={search}
+        setSearch={setSearch}
+        startSearch={startSearch}
+      />
       {allList.length > 0 ? (
         <FlatList
           data={allList}
@@ -200,7 +251,6 @@ const mapStateToProps = (state) => ({
 });
 
 export default connect(mapStateToProps)(All);
-
 
 export const messagin = () => {
   if (Platform.OS !== "android") {

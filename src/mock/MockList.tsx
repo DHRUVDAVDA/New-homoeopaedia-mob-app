@@ -28,7 +28,7 @@ type MyProps = {
   token: string;
 };
 
-const MockList = React.memo(({ navigation, user, token, tab}: MyProps) => {
+const MockList = React.memo(({ navigation, user, token, tab }: MyProps) => {
   const [mock, setMock] = useState({});
   const [onlyMock, setOnlyMock] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -37,7 +37,7 @@ const MockList = React.memo(({ navigation, user, token, tab}: MyProps) => {
 
   const route = useRoute();
   // const tab = route.params?.tab || "All";
-  console.log("sel tab %%% ",tab)
+  console.log("sel tab %%% ", tab);
   const onRefresh = () => {
     setIsRefreshing(true);
     setLoading(true);
@@ -57,7 +57,7 @@ const MockList = React.memo(({ navigation, user, token, tab}: MyProps) => {
                 user.user_id
               }/${tab}?api_token=${token}&created_at=${moment()}`
         );
-        console.log("mocklist", res)
+        console.log("mocklist", res);
         setMock(res.data);
         setOnlyMock(res.data.result.data);
       } catch (error) {
@@ -90,11 +90,10 @@ const MockList = React.memo(({ navigation, user, token, tab}: MyProps) => {
                 user.user_id
               }/${tab}?api_token=${token}&created_at=${moment()}${searchText}`
         );
-        console.log("#######", res.data.result.data)
+        console.log("#######", res.data.result.data);
         setMock(res.data);
         setOnlyMock((prev) => uniqBy([...prev, ...res.data.result.data], "id"));
-        console.log("## mock list one ##", res.data)
-
+        console.log("## mock list one ##", res.data);
       } catch (error) {
         Toast.show("Network error. Try again.", Toast.LONG);
       }
@@ -165,7 +164,7 @@ const MockList = React.memo(({ navigation, user, token, tab}: MyProps) => {
                   duration: duration,
                   start: start,
                   end: end,
-                  fromTab: tab
+                  fromTab: tab,
                 });
           else
             navigation.navigate("MockResult", {
@@ -223,7 +222,7 @@ const MockList = React.memo(({ navigation, user, token, tab}: MyProps) => {
                   duration: duration,
                   start: start,
                   end: end,
-                  fromTab: tab
+                  fromTab: tab,
                 });
               },
               (error) => {
@@ -262,7 +261,7 @@ const MockList = React.memo(({ navigation, user, token, tab}: MyProps) => {
           <Text style={styles.heading}>{item.name}</Text>
           <View style={styles.lastItemList}>
             <AntDesign
-              name="play"
+              name="play-circle"
               size={moderateScale(16)}
               color="#22bdc1"
               style={styles.mr5}
@@ -271,7 +270,7 @@ const MockList = React.memo(({ navigation, user, token, tab}: MyProps) => {
           </View>
         </View>
         <View style={styles.icons}>
-          {item.ccount > 0 && item.exam_status === "completed" &&(
+          {item.ccount > 0 && item.exam_status === "completed" && (
             <TouchableOpacity
               onPress={() =>
                 reAttempt(
@@ -287,14 +286,14 @@ const MockList = React.memo(({ navigation, user, token, tab}: MyProps) => {
               }
             >
               <AntDesign
-                name="reload1"
+                name="reload"
                 size={moderateScale(16)}
                 color="#ffffff"
                 style={[styles.startTrophy, styles.mr10]}
               />
             </TouchableOpacity>
           )}
-          {item.qcount > 0 && ( 
+          {item.qcount > 0 && (
             <TouchableOpacity
               onPress={() =>
                 startOrReview(
@@ -309,7 +308,7 @@ const MockList = React.memo(({ navigation, user, token, tab}: MyProps) => {
                 )
               }
             >
-              {item.ccount > 0  && item.exam_status == "completed" ? (
+              {item.ccount > 0 && item.exam_status == "completed" ? (
                 <EvilIcons
                   name="trophy"
                   size={moderateScale(22)}
@@ -355,9 +354,7 @@ const MockList = React.memo(({ navigation, user, token, tab}: MyProps) => {
         />
       ) : (
         <View style={styles.scroller}>
-          {!loading && (
-          <Text>No mock test found</Text>
-          )}
+          {!loading && <Text>No mock test found</Text>}
         </View>
       )}
     </View>

@@ -1,12 +1,12 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, TouchableOpacity, FlatList } from 'react-native';
+import React, { useEffect, useState } from "react";
+import { View, Text, TouchableOpacity, FlatList } from "react-native";
 import { connect } from "react-redux";
-import { User } from '../../_redux/reducers/types';
-import GrandStyles from './GrandStyles';
-import Loading from '../../layout/Loading';
-import InputSearch from '../../components/InputSearch';
-import axios from 'axios';
-import { BASE_URL } from '../../consts';
+import { User } from "../../_redux/reducers/types";
+import GrandStyles from "./GrandStyles";
+import Loading from "../../layout/Loading";
+import InputSearch from "../../components/InputSearch";
+import axios from "axios";
+import { BASE_URL } from "../../consts";
 import Toast from "react-native-simple-toast";
 import { Feather, EvilIcons, AntDesign } from "@expo/vector-icons";
 
@@ -122,7 +122,7 @@ const Grand = ({ navigation, user, token }: MyProps) => {
                     >
                       {item.ccount === item.qcount && (
                         <AntDesign
-                          name="reload1"
+                          name="reload"
                           size={16}
                           color="#ffffff"
                           style={[GrandStyles.startTrophy, GrandStyles.mr10]}
@@ -166,8 +166,7 @@ const Grand = ({ navigation, user, token }: MyProps) => {
       )}
     </View>
   );
-}
-
+};
 
 const mapStateToProps = (state: any) => ({
   isAuthenticated: state.authReducer.isAuthenticated,

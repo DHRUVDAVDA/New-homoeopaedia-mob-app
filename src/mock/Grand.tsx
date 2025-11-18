@@ -120,7 +120,7 @@ const Grand = ({ navigation, user, token }: MyProps) => {
                     >
                       {item.ccount === item.qcount && (
                         <AntDesign
-                          name="reload1"
+                          name="reload"
                           size={16}
                           color="#ffffff"
                           style={[styles.startTrophy, styles.mr10]}

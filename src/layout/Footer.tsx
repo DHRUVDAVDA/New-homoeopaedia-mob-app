@@ -6,7 +6,7 @@ import {
   FontAwesome,
   MaterialIcons,
 } from "@expo/vector-icons";
-import { useNavigationState } from '@react-navigation/native'; // <-- ADD THIS
+import { useNavigationState } from "@react-navigation/native"; // <-- ADD THIS
 import { semi_bold } from "../constants/font";
 import { moderateScale } from "react-native-size-matters";
 
@@ -16,7 +16,7 @@ type MyProps = {
 };
 
 const Footer = ({ navigation, page }: MyProps) => {
-  const state = useNavigationState(state => state); // get current navigation state
+  const state = useNavigationState((state) => state); // get current navigation state
 
   // Get active route name
   const currentRouteName = state.routes[state.index].name;
@@ -41,9 +41,7 @@ const Footer = ({ navigation, page }: MyProps) => {
           color={page === "Home" ? "#22bdc1" : "#000000"}
         />
         {page === "Home" && (
-          <Text style={[styles.text, { color: "#22bdc1" }]}>
-            Home
-          </Text>
+          <Text style={[styles.text, { color: "#22bdc1" }]}>Home</Text>
         )}
       </TouchableOpacity>
 
@@ -52,14 +50,12 @@ const Footer = ({ navigation, page }: MyProps) => {
         style={styles.single}
       >
         <AntDesign
-          name="questioncircle"
+          name="question-circle"
           size={20}
           color={page === "Question" ? "#22bdc1" : "#000000"}
         />
         {page === "Question" && (
-          <Text style={[styles.text, { color: "#22bdc1" }]}>
-            Questions
-          </Text>
+          <Text style={[styles.text, { color: "#22bdc1" }]}>Questions</Text>
         )}
       </TouchableOpacity>
 
@@ -73,9 +69,7 @@ const Footer = ({ navigation, page }: MyProps) => {
           color={page === "Mock" ? "#22bdc1" : "#000000"}
         />
         {page === "Mock" && (
-          <Text style={[styles.text, { color: "#22bdc1" }]}>
-            Tests
-          </Text>
+          <Text style={[styles.text, { color: "#22bdc1" }]}>Tests</Text>
         )}
       </TouchableOpacity>
 
@@ -89,9 +83,7 @@ const Footer = ({ navigation, page }: MyProps) => {
           color={page === "Video" ? "#22bdc1" : "#000000"}
         />
         {page === "Video" && (
-          <Text style={[styles.text, { color: "#22bdc1" }]}>
-            Videos
-          </Text>
+          <Text style={[styles.text, { color: "#22bdc1" }]}>Videos</Text>
         )}
       </TouchableOpacity>
     </View>
@@ -111,7 +103,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   text: {
-    fontFamily:  semi_bold,
+    fontFamily: semi_bold,
     fontSize: moderateScale(12),
   },
 });

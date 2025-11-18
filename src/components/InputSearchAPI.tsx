@@ -20,14 +20,14 @@ const InputSearchAPI = ({ search, setSearch, startSearch }: MyProps) => {
           style={styles.inputSearch}
         />
         <AntDesign
-          name="search1"
+          name="search"
           size={20}
           color={"#888888"}
           style={styles.icon}
         />
       </View>
       <TouchableOpacity onPress={startSearch} style={styles.iconSearch}>
-        <AntDesign name="search1" size={20} color={"#ffffff"} />
+        <AntDesign name="search" size={20} color={"#ffffff"} />
       </TouchableOpacity>
     </View>
   );
