@@ -5,17 +5,16 @@ import { store, persistor } from "./src/store/configureStore";
 import AppNavigator from "./AppNavigator";
 // import NotificationController from "./NotificationController.android";
 import { StatusBar } from "expo-status-bar";
-import * as ScreenCapture from "expo-screen-capture";
+import { CaptureProtection } from "react-native-capture-protection";
 import { useFonts } from "expo-font";
 import { View, ActivityIndicator, Alert } from "react-native";
 
-import messaging from '@react-native-firebase/messaging';
-import { requestUserPermission } from './NotificationService';
+import messaging from "@react-native-firebase/messaging";
+import { requestUserPermission } from "./NotificationService";
 
 import { navigate } from "./src/NavigationService";
 
 export default function App() {
-
   useEffect(() => {
     requestUserPermission();
 
@@ -25,19 +24,19 @@ export default function App() {
     //   Alert.alert(title || 'Notification', body || 'You have a new message');
     // });
 
-    const unsubscribe = messaging().onMessage(async remoteMessage => {
+    const unsubscribe = messaging().onMessage(async (remoteMessage) => {
       const { title, body } = remoteMessage?.notification;
-      console.log(remoteMessage)
+      console.log(remoteMessage);
       const item = {
         id: remoteMessage?.data?.id,
         image: remoteMessage?.data?.image,
         title: remoteMessage?.data?.title,
         descr: remoteMessage?.data?.descr,
-        created_at: remoteMessage?.data?.created_at
-      }
+        created_at: remoteMessage?.data?.created_at,
+      };
       const shortDescr =
-        (remoteMessage?.data?.descr?.length > 100)
-          ? remoteMessage.data.descr.slice(0, 100) + '...'
+        remoteMessage?.data?.descr?.length > 100
+          ? remoteMessage.data.descr.slice(0, 100) + "..."
           : remoteMessage.data.descr;
 
       Alert.alert(
@@ -55,12 +54,9 @@ export default function App() {
             style: "cancel",
           },
         ],
-        { cancelable: true }
+        { cancelable: true },
       );
-
     });
-
-
 
     // // Background & quit state message handler
     // messaging().setBackgroundMessageHandler(async remoteMessage => {
@@ -69,24 +65,26 @@ export default function App() {
 
     // return unsubscribe;
 
-    const unsubscribeOpened = messaging().onNotificationOpenedApp(remoteMessage => {
-      console.log("Opened from background:", remoteMessage);
-      if (remoteMessage?.data) {
-        const item = {
-          id: remoteMessage.data.id,
-          image: remoteMessage.data.image,
-          title: remoteMessage.data.title,
-          descr: remoteMessage.data.descr,
-          created_at: remoteMessage.data.created_at,
-        };
-        navigate("NotiDetail", { item });
-      }
-    });
+    const unsubscribeOpened = messaging().onNotificationOpenedApp(
+      (remoteMessage) => {
+        console.log("Opened from background:", remoteMessage);
+        if (remoteMessage?.data) {
+          const item = {
+            id: remoteMessage.data.id,
+            image: remoteMessage.data.image,
+            title: remoteMessage.data.title,
+            descr: remoteMessage.data.descr,
+            created_at: remoteMessage.data.created_at,
+          };
+          navigate("NotiDetail", { item });
+        }
+      },
+    );
 
     // Quit state notification tap
     messaging()
       .getInitialNotification()
-      .then(remoteMessage => {
+      .then((remoteMessage) => {
         if (remoteMessage?.data) {
           console.log("Opened from quit state:", remoteMessage);
           const item = {
@@ -101,7 +99,7 @@ export default function App() {
       });
 
     // Background message handler (for completeness)
-    messaging().setBackgroundMessageHandler(async remoteMessage => {
+    messaging().setBackgroundMessageHandler(async (remoteMessage) => {
       console.log("Background message received:", remoteMessage);
     });
 
@@ -112,10 +110,15 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    const preventScreenCapture = async () => {
-      await ScreenCapture.preventScreenCaptureAsync();
+    CaptureProtection.prevent({
+      screenshot: true,
+      record: true,
+      appSwitcher: true,
+    });
+
+    return () => {
+      CaptureProtection.allow();
     };
-    preventScreenCapture();
   }, []);
 
   // Load Fonts
