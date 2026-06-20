@@ -13,7 +13,8 @@
       "backgroundColor": "#ffffff"
     },
     "platforms": [
-      "android"
+      "android",
+      "ios"
     ],
     "android": {
       "adaptiveIcon": {
@@ -31,19 +32,23 @@
         {
           "android": {
             "enableProguardInReleaseBuilds": false,
-            "useAndroidX": true
+            "useAndroidX": true,
+            "enableMinifyInReleaseBuilds": false
           }
         }
       ],
       [
-      "react-native-capture-protection",
-      {
-        "captureType": "base"
-      }
-    ]
+        "react-native-capture-protection",
+        {
+          "captureType": "base"
+        }
+      ]
     ],
     "assetBundlePatterns": [
       "**/*"
-    ]
+    ],
+    "ios": {
+      "bundleIdentifier": "com.homoeopaedia"
+    }
   }
 }

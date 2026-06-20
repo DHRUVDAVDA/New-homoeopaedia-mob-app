@@ -152,6 +152,7 @@ const Home = ({ navigation, token, user }: MyProps) => {
       fcm_token: fcm_token
     };
     const URL = `${BASE_URL}/home/subscription-check/?api_token=${token}`;
+
     axios.post(URL, postData).then(
       (res) => {
         console.log("URL--", res);
@@ -160,7 +161,7 @@ const Home = ({ navigation, token, user }: MyProps) => {
             console.log(res.data.data);
             setSubscription(res.data.data);
           }
-        }else{
+        } else {
           Alert.alert(res.data.message)
         }
       },

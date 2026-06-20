@@ -332,6 +332,7 @@ const SolutionQues = ({ navigation, route, user, token }: MyProps) => {
   }
 
   const questionHTML = questions?.[quesNo]?.ques ?? '';
+  
   const plainText = convertHTMLToPlainText(questionHTML);
   const isTruncated = plainText.length > CHARACTER_LIMIT;
   const truncatedText = isTruncated

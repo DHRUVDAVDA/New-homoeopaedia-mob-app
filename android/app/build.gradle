@@ -88,11 +88,12 @@ android {
 
     namespace 'com.homoeopaedia'
         defaultConfig {
+		missingDimensionStrategy "react-native-capture-protection", "base"
         applicationId 'com.homoeopaedia'
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 32
-        versionName "1.7.14"
+        versionCode 1
+        versionName "1.7.0"
         missingDimensionStrategy 'react-native-capture-protection', 'base'
     }
       signingConfigs {

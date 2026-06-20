@@ -7,12 +7,13 @@
     "android": "expo run:android",
     "build:apk": "cd android && ./gradlew assembleRelease",
     "build:aab": "cd android && ./gradlew bundleRelease",
-    "project-clean": "cd android && ./gradlew clean && cd .."
+    "project-clean": "cd android && ./gradlew clean && cd ..",
+    "ios": "expo run:ios"
   },
   "dependencies": {
     "@react-native-async-storage/async-storage": "2.2.0",
-    "@react-native-firebase/app": "^21.7.2",
-    "@react-native-firebase/messaging": "^21.7.2",
+    "@react-native-firebase/app": "^24.1.1",
+    "@react-native-firebase/messaging": "^24.1.1",
     "@react-native-picker/picker": "2.11.2",
     "@react-navigation/bottom-tabs": "^7.2.0",
     "@react-navigation/drawer": "^7.1.1",

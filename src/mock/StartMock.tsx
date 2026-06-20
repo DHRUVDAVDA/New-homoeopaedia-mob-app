@@ -227,6 +227,8 @@ const StartMock = ({ navigation, route, user, token }: MyProps) => {
   };
 
   const loadQuestions = async () => {
+    console.log("api calllll",`${BASE_URL}/mockquestions/${user.user_id}/${titleId}?api_token=${token}`);
+    
     await axios
       .get(
         `${BASE_URL}/mockquestions/${user.user_id}/${titleId}?api_token=${token}`
@@ -627,6 +629,8 @@ const StartMock = ({ navigation, route, user, token }: MyProps) => {
   }
 
   const questionHTML = questions?.[quesIndex]?.ques ?? '';
+  console.log("questionHTML",questions?.[quesIndex]);
+  
   const plainText = convertHTMLToPlainText(questionHTML);
   const isTruncated = plainText.length > CHARACTER_LIMIT;
   const truncatedText = isTruncated

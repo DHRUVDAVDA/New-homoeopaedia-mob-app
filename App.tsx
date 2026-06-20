@@ -13,6 +13,7 @@ import messaging from "@react-native-firebase/messaging";
 import { requestUserPermission } from "./NotificationService";
 
 import { navigate } from "./src/NavigationService";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function App() {
   useEffect(() => {
@@ -146,9 +147,11 @@ export default function App() {
   return (
     <Provider store={store}>
       <PersistGate loading={null} persistor={persistor}>
+        <SafeAreaView edges={['bottom']} style={{flex:1, backgroundColor:"#cccccc"}}>
         <StatusBar translucent backgroundColor="transparent" style="light" />
         {/* <NotificationController /> */}
         <AppNavigator />
+        </SafeAreaView>
       </PersistGate>
     </Provider>
   );
