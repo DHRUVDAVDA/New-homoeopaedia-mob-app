@@ -5,6 +5,7 @@ import {
   View,
   TouchableOpacity,
   ScrollView,
+  Alert,
 } from "react-native";
 import { FontAwesome5 } from "@expo/vector-icons";
 import app from "../../app.json";
@@ -21,9 +22,10 @@ type MyProps = {
   user: User;
   navigation: any;
   logOut: any;
+  token: string;
 };
 
-const DrawerMenu = ({ user, navigation, logOut }: MyProps) => {
+const DrawerMenu = ({ user, navigation, logOut, token }: MyProps) => {
   const [loading, setLoading] = useState(false);
 
   const signOut = async () => {
@@ -44,6 +46,53 @@ const DrawerMenu = ({ user, navigation, logOut }: MyProps) => {
       (error) => {
         setLoading(false);
       }
+    );
+  };
+
+  const deleteAccount = () => {
+    Alert.alert(
+      "Delete Account",
+      "Are you sure you want to delete your account? This action cannot be undone.",
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: async () => {
+            setLoading(true);
+
+            await axios
+              .delete(`${BASE_URL}/account/delete?api_token=${token}`)
+              .then(
+                (res) => {
+                  console.log("response from delete",`${BASE_URL}/account/delete?api_token=${token}`);
+                  
+                  setLoading(false);
+
+                  logOut(false, {}, "");
+                  const resetAction = CommonActions.reset({
+                    index: 0,
+                    routes: [{ name: "Login" }],
+                  });
+
+                  navigation.dispatch(resetAction);
+                },
+                (error) => {
+                  console.log("errorrr",error);
+                  
+                  setLoading(false);
+                  Alert.alert(
+                    "Error",
+                    "Failed to delete account. Please try again."
+                  );
+                }
+              );
+          },
+        },
+      ]
     );
   };
 
@@ -111,6 +160,9 @@ const DrawerMenu = ({ user, navigation, logOut }: MyProps) => {
             </TouchableOpacity>
             <TouchableOpacity onPress={signOut} style={styles.linkGap}>
               <Text style={[styles.colorWhite, styles.smallText]}>Logout</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={deleteAccount} style={styles.linkGap}>
+              <Text style={[styles.colorWhite, styles.smallText]}>Delete Account</Text>
             </TouchableOpacity>
           </View>
           <View style={styles.line} />

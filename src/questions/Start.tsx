@@ -19,12 +19,18 @@ import Loading from "../layout/Loading";
 import { Entypo, Ionicons } from "@expo/vector-icons";
 import { User } from "../_redux/reducers/types";
 import HTML from "react-native-render-html";
-import { Picker } from "@react-native-picker/picker";
+import { SelectPicker } from "../components/SelectPicker";
 import Toast from "react-native-simple-toast";
 import { main_font } from "../constants/font";
 import { moderateScale } from "react-native-size-matters";
 
 const { width } = Dimensions.get('window');
+
+const reportItems = [
+	{ label: "Factual error", value: "Factual error" },
+	{ label: "Confusing question", value: "Confusing question" },
+	{ label: "Inadequate explanation", value: "Inadequate explanation" },
+];
 
 type MyProps = {
 	navigation: any;
@@ -464,46 +470,12 @@ const Start = ({ navigation, route, token, user }: MyProps) => {
 											<Text style={styles.label}>
 												What are you reporting?
 											</Text>
-											<View
-												style={{
-													alignSelf: "flex-start",
-													borderWidth: 1,
-													borderColor: "#000000",
-													marginTop: 10,
-													marginBottom: 10,
-												}}
-											>
-												<Picker
-													selectedValue={type}
-													onValueChange={(item) =>
-														setType(item)
-													}
-													style={{
-														width:
-															Dimensions.get(
-																"window",
-															).width - 80,
-													}}
-													mode="dropdown"
-												>
-													<Picker.Item
-														label="---- Select Type ----"
-														value=""
-													/>
-													<Picker.Item
-														label="Factual error"
-														value="Factual error"
-													/>
-													<Picker.Item
-														label="Confusing question"
-														value="Confusing question"
-													/>
-													<Picker.Item
-														label="Inadequate explanation"
-														value="Inadequate explanation"
-													/>
-												</Picker>
-											</View>
+											<SelectPicker
+												placeholder="---- Select Type ----"
+												selectedValue={type}
+												onValueChange={(item) => setType(item)}
+												items={reportItems}
+											/>
 											<Text style={styles.label}>
 												Elaborate issue
 											</Text>

@@ -145,12 +145,13 @@ export default function App() {
   }
 
   return (
+
     <Provider store={store}>
       <PersistGate loading={null} persistor={persistor}>
-        <SafeAreaView edges={['bottom']} style={{flex:1, backgroundColor:"#cccccc"}}>
-        <StatusBar translucent backgroundColor="transparent" style="light" />
-        {/* <NotificationController /> */}
-        <AppNavigator />
+        <SafeAreaView edges={['bottom', 'top']} style={{ flex: 1, backgroundColor: "#cccccc" }}>
+          <StatusBar translucent backgroundColor="transparent" style="light" />
+          {/* <NotificationController /> */}
+          <AppNavigator />
         </SafeAreaView>
       </PersistGate>
     </Provider>

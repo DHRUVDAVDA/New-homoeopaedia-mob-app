@@ -95,7 +95,7 @@ const Styles = StyleSheet.create({
 		alignSelf: "flex-start",
 		marginBottom: 30,
 	},
-	dontaccnt:{
+	dontaccnt: {
 		fontFamily: regular,
 		fontSize: moderateScale(12)
 	}

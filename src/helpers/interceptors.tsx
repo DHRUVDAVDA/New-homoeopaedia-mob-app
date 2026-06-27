@@ -7,7 +7,7 @@ export function setupInterceptors(dispatch: any) {
 	axios.interceptors.response.use(null, async (error) => {
 		const { response } = error;
 		if (!response) {
-			return;
+			return Promise.reject(error);
 		}
 
 		if ([401, 403].includes(response.status)) {
@@ -29,5 +29,7 @@ export function setupInterceptors(dispatch: any) {
 				(error) => {},
 			);
 		}
+
+		return Promise.reject(error);
 	});
 }

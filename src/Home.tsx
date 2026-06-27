@@ -36,6 +36,8 @@ type MyProps = {
 };
 
 const Home = ({ navigation, token, user }: MyProps) => {
+  console.log("tokennn", token, user);
+
   const [mcq, setMCQ] = useState([]);
   const [one, setOne] = useState([]);
   const [mnemonics, setMnemonics] = useState([]);

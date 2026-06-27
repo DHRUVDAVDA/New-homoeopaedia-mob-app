@@ -10,7 +10,6 @@ import {
 import HeaderText from "../layout/HeaderText";
 import Footer from "../layout/Footer";
 import styles from "./bookmarkStyles";
-import { Picker } from "@react-native-picker/picker";
 import { connect } from "react-redux";
 import axios from "axios";
 import { BASE_URL } from "../consts";

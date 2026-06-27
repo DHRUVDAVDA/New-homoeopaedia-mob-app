@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import {
   View,
   Text,
@@ -8,12 +8,13 @@ import {
 import HeaderText from "../layout/HeaderText";
 import Footer from "../layout/Footer";
 import styles from "./rankStyles";
-import { Picker } from "@react-native-picker/picker";
+import { SelectPicker } from "../components/SelectPicker";
 import { connect } from "react-redux";
 import axios from "axios";
 import { BASE_URL } from "../consts";
 import { User } from "../_redux/reducers/types";
 import Loading from "../layout/Loading";
+import { FontAwesome } from "@expo/vector-icons";
 
 const { width } = Dimensions.get("window");
 
@@ -29,6 +30,13 @@ const RankScreen = ({ navigation, user, token }: MyProps) => {
   const [title, setTitle] = useState([]);
   const [rankList, setRankList] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  const examItems = useMemo(() => {
+    return title.map((item: any) => ({
+      label: item.name,
+      value: item.id.toString(),
+    }));
+  }, [title]);
 
   useEffect(() => {
     fetchTitles();
@@ -86,22 +94,25 @@ const RankScreen = ({ navigation, user, token }: MyProps) => {
     <View style={styles.container}>
       <Loading loading={loading} text="Loading contents. Please wait." />
       <HeaderText navigation={navigation} heading="Leaderboard" />
-      <View style={styles.pickerContainer}>
-        <Picker
-          selectedValue={selSubject}
+      <View style={{ paddingHorizontal: 15, marginBottom: 10 }}>
+        <SelectPicker
+          placeholder="Select Exam"
+          selectedValue={selSubject === "Select Subject" ? "" : selSubject}
           onValueChange={(item) => changeTitle(item)}
-          style={styles.picker}
-          mode="dropdown"
-        >
-          <Picker.Item label="Select Exam" value="" enabled={false} />
-          {title.map((item: any) => (
-            <Picker.Item
-              label={item.name}
-              value={item.id.toString()}
-              key={item.id}
+          items={examItems}
+          icon={
+            <FontAwesome
+              name="trophy"
+              size={18}
+              color={
+                selSubject && selSubject !== "Select Subject"
+                  ? "#22bdc1"
+                  : "#888888"
+              }
+              style={{ paddingLeft: 10 }}
             />
-          ))}
-        </Picker>
+          }
+        />
       </View>
       <View style={styles.mainContainer}>
         {!selSubject || selSubject === "Select Subject" ? (
@@ -114,7 +125,7 @@ const RankScreen = ({ navigation, user, token }: MyProps) => {
           </View>
         ) : loading ? null : rankList.length === 0 ? (
           <View
-          style={styles.centerAlignContainer}
+            style={styles.centerAlignContainer}
           >
             <Text style={styles.WarningText}>
               No rank list available for this exam.
@@ -136,7 +147,7 @@ const RankScreen = ({ navigation, user, token }: MyProps) => {
                 Student
               </Text>
               <Text
-                style={[styles.thText,{textAlign: "right"}]}
+                style={[styles.thText, { textAlign: "right" }]}
               >
                 Mark
               </Text>
@@ -154,25 +165,25 @@ const RankScreen = ({ navigation, user, token }: MyProps) => {
                 >
                   <Text
                     style={[
-                        styles.tdText,
-                        {fontWeight: isTopRank ? "bold" : "normal",},
+                      styles.tdText,
+                      { fontWeight: isTopRank ? "bold" : "normal", },
                     ]}
                   >
                     {index + 1}
                   </Text>
                   <Text
                     style={[
-                        styles.tdText,
-                        {fontWeight: isTopRank ? "bold" : "normal",},
+                      styles.tdText,
+                      { fontWeight: isTopRank ? "bold" : "normal", },
                     ]}
                   >
                     {item.user_name}
                   </Text>
                   <Text
                     style={[
-                        styles.tdText,
-                        {textAlign: "right"},
-                        {fontWeight: isTopRank ? "bold" : "normal",},
+                      styles.tdText,
+                      { textAlign: "right" },
+                      { fontWeight: isTopRank ? "bold" : "normal", },
                     ]}
                   >
                     {item.mark}

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import {
   Dimensions,
   Image,
@@ -25,8 +25,19 @@ import Loading from "../layout/Loading";
 import { UserActionTypes } from "../_redux/reducers/types";
 import { CommonActions } from "@react-navigation/routers";
 import Toast from "react-native-simple-toast";
-import { Picker } from "@react-native-picker/picker";
+import { SelectPicker } from "../components/SelectPicker";
 import { filter } from "lodash";
+
+const yearItems = [
+  { label: "First Year", value: "First Year" },
+  { label: "Second Year", value: "Second Year" },
+  { label: "Third Year", value: "Third Year" },
+  { label: "Fourth Year", value: "Fourth Year" },
+  { label: "Intern", value: "Intern" },
+  { label: "Post Intern", value: "Post Intern" },
+  { label: "PG Scholar", value: "PG Scholar" },
+  { label: "Physician", value: "Physician" },
+];
 
 type MyProps = {
   navigation: any;
@@ -42,6 +53,20 @@ const Register = ({ navigation, logIn }: MyProps) => {
   const [states, setStates] = useState([]);
   const [collegesO, setCollegesO] = useState([]);
   const [colleges, setColleges] = useState([]);
+
+  const stateItems = useMemo(() => {
+    return states.map((item: any) => ({
+      label: item.name,
+      value: item.id,
+    }));
+  }, [states]);
+
+  const collegeItems = useMemo(() => {
+    return colleges.map((item: any) => ({
+      label: item.name,
+      value: item.id,
+    }));
+  }, [colleges]);
 
   useEffect(() => {
     getState();
@@ -103,6 +128,7 @@ const Register = ({ navigation, logIn }: MyProps) => {
         })
         .then((response) => {
           setLoading(false);
+          console.log("ressssss",response);
 
           if (response.data.success) {
             logIn(false, response.data.user_data, response.data.token);
@@ -117,6 +143,7 @@ const Register = ({ navigation, logIn }: MyProps) => {
           }
         })
         .catch((error) => {
+          console.log("errorrr",error);
           setLoading(false);
           Toast.show("Network error. Tryagain.", Toast.LONG);
         });
@@ -258,112 +285,60 @@ const Register = ({ navigation, logIn }: MyProps) => {
               {errors.phone && touched.phone && (
                 <Text style={styles.error}>{errors.phone}</Text>
               )}
-              <View
-                style={
-                  isActive === 4 || year
-                    ? [styles.singleInput, styles.singleInputA]
-                    : styles.singleInput
-                }
-              >
-                <AntDesign
-                  name="calendar"
-                  size={24}
-                  color={isActive === 4 || year ? "#22bdc1" : "#888888"}
-                  style={styles.icons}
-                />
-                <Picker
-                  selectedValue={year}
-                  onValueChange={(item) => {
-                    setYear(item);
-                    setIsActive(4);
-                  }}
-                  style={{
-                    width: Dimensions.get("window").width - 80,
-                    color: isActive === 4 || year ? "#22bdc1" : "#888888",
-                  }}
-                  mode="dropdown"
-                >
-                  <Picker.Item
-                    label="---- Select Graduation Year ----"
-                    value=""
+              <SelectPicker
+                placeholder="---- Select Graduation Year ----"
+                selectedValue={year}
+                onValueChange={(item) => {
+                  setYear(item);
+                  setIsActive(4);
+                }}
+                items={yearItems}
+                icon={
+                  <AntDesign
+                    name="calendar"
+                    size={24}
+                    color={isActive === 4 || year ? "#22bdc1" : "#888888"}
+                    style={styles.icons}
                   />
-                  <Picker.Item label="First Year" value="First Year" />
-                  <Picker.Item label="Second Year" value="Second Year" />
-                  <Picker.Item label="Third Year" value="Third Year" />
-                  <Picker.Item label="Fourth Year" value="Fourth Year" />
-                  <Picker.Item label="Intern" value="Intern" />
-                  <Picker.Item label="Post Intern" value="Post Intern" />
-                  <Picker.Item label="PG Scholar" value="PG Scholar" />
-                  <Picker.Item label="Physician" value="Physician" />
-                </Picker>
-              </View>
-              <View
-                style={
-                  isActive === 5 || state
-                    ? [styles.singleInput, styles.singleInputA]
-                    : styles.singleInput
                 }
-              >
-                <FontAwesome5
-                  name="map-marked-alt"
-                  size={24}
-                  color={isActive === 5 || state ? "#22bdc1" : "#888888"}
-                  style={styles.icons}
-                />
-                <Picker
-                  selectedValue={state}
-                  onValueChange={(item) => {
-                    changeState(item);
-                    setIsActive(5);
-                  }}
-                  style={{
-                    width: Dimensions.get("window").width - 80,
-                    color: isActive === 5 || state ? "#22bdc1" : "#888888",
-                  }}
-                  mode="dropdown"
-                >
-                  <Picker.Item label="---- Select State ----" value="" />
-                  {states.map((item: any) => (
-                    <Picker.Item
-                      label={item.name}
-                      value={item.id}
-                      key={item.id}
-                    />
-                  ))}
-                </Picker>
-              </View>
-              <View
-                style={
-                  isActive === 6 || college
-                    ? [styles.singleInput, styles.singleInputA]
-                    : styles.singleInput
+                isActive={isActive === 4}
+              />
+              <SelectPicker
+                placeholder="---- Select State ----"
+                selectedValue={state}
+                onValueChange={(item) => {
+                  changeState(item);
+                  setIsActive(5);
+                }}
+                items={stateItems}
+                icon={
+                  <FontAwesome5
+                    name="map-marked-alt"
+                    size={24}
+                    color={isActive === 5 || state ? "#22bdc1" : "#888888"}
+                    style={styles.icons}
+                  />
                 }
-              >
-                <FontAwesome5
-                  name="university"
-                  size={24}
-                  color={isActive === 6 || college ? "#22bdc1" : "#888888"}
-                  style={styles.icons}
-                />
-                <Picker
-                  selectedValue={college}
-                  onValueChange={(item) => setCollege(item)}
-                  style={{
-                    width: Dimensions.get("window").width - 80,
-                    color: isActive === 6 || college ? "#22bdc1" : "#888888",
-                  }}
-                  mode="dropdown"
-                >
-                  <Picker.Item label="---- Select College ----" value="" />
-                  {colleges.map((item: any) => (
-                    <Picker.Item
-                      label={item.name}
-                      value={item.id}
-                      key={item.id}
-                    />
-                  ))}
-                </Picker>
-              </View>
+                isActive={isActive === 5}
+              />
+              <SelectPicker
+                placeholder="---- Select College ----"
+                selectedValue={college}
+                onValueChange={(item) => {
+                  setCollege(item);
+                  setIsActive(6);
+                }}
+                items={collegeItems}
+                icon={
+                  <FontAwesome5
+                    name="university"
+                    size={24}
+                    color={isActive === 6 || college ? "#22bdc1" : "#888888"}
+                    style={styles.icons}
+                  />
+                }
+                isActive={isActive === 6}
+              />
               <View
                 style={
                   isActive === 7 || values.password

@@ -84,6 +84,7 @@ const Login = ({ navigation, logIn }: MyProps) => {
       .then((response) => {
         setLoading(false);
         const res = response?.data;
+        console.log("response from login", res);
 
         if (res.status === "success" && res.success) {
           logIn(true, res.user_data, res.token);
