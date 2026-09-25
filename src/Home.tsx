@@ -16,6 +16,7 @@ import styles from "./HomeStyles";
 import axios from "axios";
 import { BASE_URL, WEB_URL } from "./consts";
 import { connect } from "react-redux";
+import { useSelector } from "react-redux";
 import HTML from "react-native-render-html";
 import Toast from "react-native-simple-toast";
 import HomeVideo from "./components/HomeVideo";
@@ -28,14 +29,16 @@ import { FontAwesome5 } from "@expo/vector-icons";
 import { User } from "./_redux/reducers/types";
 import { theme_clr } from "./constants/colors";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { initializePurchaseState } from "./services/PurchaseService";
 const { width } = Dimensions.get("window");
 type MyProps = {
   navigation: any;
   token: string;
   user: User;
+  dispatch?: any;
 };
 
-const Home = ({ navigation, token, user }: MyProps) => {
+const Home = ({ navigation, token, user, dispatch }: MyProps) => {
   console.log("tokennn", token, user);
 
   const [mcq, setMCQ] = useState([]);
@@ -53,6 +56,11 @@ const Home = ({ navigation, token, user }: MyProps) => {
   const [testiSelected, setTestiSelected] = useState({});
   const [subscription, setSubscription] = useState<any[] | number>([]);
 
+  // IAP purchase state
+  const { supportsInAppPurchase, isPurchased } = useSelector(
+    (state: any) => state.purchaseReducer
+  );
+
   useEffect(() => {
     getSubscriptionDetails();
     getMCQ();
@@ -60,7 +68,10 @@ const Home = ({ navigation, token, user }: MyProps) => {
     getMnemonics();
     getVideo();
     getTestimonial();
-
+    // Initialize purchase state (IAP gating + isPurchased from Firebase)
+    if (user?.user_id) {
+      initializePurchaseState(user.user_id, dispatch);
+    }
   }, []);
 
   const getMCQ = () => {
@@ -160,7 +171,6 @@ const Home = ({ navigation, token, user }: MyProps) => {
         console.log("URL--", res);
         if (res.data.success) {
           if (res.data.data) {
-            console.log(res.data.data);
             setSubscription(res.data.data);
           }
         } else {
@@ -246,10 +256,16 @@ const Home = ({ navigation, token, user }: MyProps) => {
                   </TouchableOpacity>
                   <TouchableOpacity
                     style={styles.box}
-                    onPress={() =>
-                      subscription > 0 ? navigation.navigate("TitleList") :
-                        Toast.show("Plan expired", Toast.LONG)
-                    }
+                    onPress={() => {
+                      // IAP path: isPurchased grants direct access
+                      if (supportsInAppPurchase && isPurchased) {
+                        navigation.navigate("TitleList");
+                      } else if (subscription > 0) {
+                        navigation.navigate("TitleList");
+                      } else {
+                        Toast.show("Plan expired", Toast.LONG);
+                      }
+                    }}
                   >
                     <FontAwesome5 name="bookmark" size={moderateScale(18)} color={theme_clr} />
                     <Text style={styles.boxText}>Bookmarks</Text>

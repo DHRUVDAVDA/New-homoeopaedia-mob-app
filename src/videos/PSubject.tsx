@@ -5,34 +5,67 @@ import {
   FlatList,
   TouchableOpacity,
   Text,
-  Linking,
 } from "react-native";
 import axios from "axios";
-import { BASE_URL, WEB_URL } from "../consts";
+import { BASE_URL } from "../consts";
 import { connect } from "react-redux";
 import Loading from "../layout/Loading";
 import Toast from "react-native-simple-toast";
 import { User } from "../_redux/reducers/types";
 import { regular, semi_bold } from "../constants/font";
 import { moderateScale } from "react-native-size-matters";
+import usePurchase from "../hooks/usePurchase";
+import PremiumPurchaseModal from "../components/PremiumPurchaseModal";
+
+// Shown to IAP-purchased users (Apple IAP doesn't go through Razorpay API)
+const DUMMY_SUBJECTS = [
+  { id: 4,  name: "Anatomy",                          slug: "anatomy",                          total: 6  },
+  { id: 6,  name: "Biochemistry",                     slug: "biochemistry",                     total: 9  },
+  { id: 18, name: "ENT",                              slug: "ent",                              total: 5  },
+  { id: 7,  name: "Forensic Medicine and Toxicology", slug: "forensic-medicine-and-toxicology", total: 5  },
+  { id: 15, name: "Gynaecology",                      slug: "gynaecology",                      total: 6  },
+  { id: 9,  name: "Homoeopathic Philosophy",          slug: "homoeopathic-philosophy",          total: 10 },
+  { id: 10, name: "Homoeopathic Repertory",           slug: "homoeopathic-repertory",           total: 19 },
+  { id: 8,  name: "Materia Medica",                   slug: "materia-medica",                   total: 31 },
+  { id: 23, name: "Microbiology",                     slug: "microbiology",                     total: 6  },
+  { id: 14, name: "Obstetrics",                       slug: "obstetrics",                       total: 11 },
+  { id: 19, name: "Ophthalmology",                    slug: "ophthalmology",                    total: 4  },
+  { id: 26, name: "Orthopaedics",                     slug: "orthopaedics",                     total: 2  },
+  { id: 22, name: "Pathology",                        slug: "pathology",                        total: 10 },
+  { id: 20, name: "Pediatrics",                       slug: "pediatrics",                       total: 5  },
+  { id: 1,  name: "Pharmacy",                         slug: "pharmacy",                         total: 7  },
+  { id: 5,  name: "Physiology",                       slug: "physiology",                       total: 13 },
+  { id: 3,  name: "Practice of Medicine",             slug: "practice-of-medicine",             total: 71 },
+  { id: 21, name: "Radiology",                        slug: "radiology",                        total: 2  },
+  { id: 13, name: "Social and Preventive Medicine",   slug: "social-and-preventive-medicine",   total: 10 },
+  { id: 12, name: "Surgery",                          slug: "surgery",                          total: 9  },
+];
 
 type MyProps = {
   navigation: any;
   user: User;
   token: string;
+  dispatch?: any;
 };
 
-const PSubject = ({ navigation, user, token }: MyProps) => {
+const PSubject = ({ navigation, user, token, dispatch }: MyProps) => {
   const [subject, setSubject] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false);
+
+  const { isPurchased, supportsInAppPurchase, triggerPurchase } = usePurchase();
 
   useEffect(() => {
+    // IAP mode: no API call needed — dummy data or upgrade CTA handles display
+    if (supportsInAppPurchase) return;
+    // Non-IAP mode: let the Razorpay API decide what to show
     getSubject();
-  }, []);
+  }, [supportsInAppPurchase, isPurchased]);
 
   const getSubject = () => {
     axios.get(`${BASE_URL}/videopaid/${user.user_id}?api_token=${token}`).then(
       (res) => {
+        console.log("videos", res.data.paid);
         setSubject(res.data.paid);
         setLoading(false);
       },
@@ -43,13 +76,26 @@ const PSubject = ({ navigation, user, token }: MyProps) => {
     );
   };
 
+  const handleUpgrade = () => {
+    triggerPurchase(() => setModalVisible(true));
+  };
+
+  // Decide what data to render
+  const displayData = supportsInAppPurchase && isPurchased ? DUMMY_SUBJECTS : subject;
+
   return (
     <View style={styles.container}>
+      <PremiumPurchaseModal
+        visible={modalVisible}
+        onClose={() => setModalVisible(false)}
+        onSuccess={() => {}} // dummy data loads automatically when isPurchased flips
+        dispatch={dispatch}
+      />
       <Loading loading={loading} text="Loading contents. Please wait." />
       <View style={styles.content}>
-        {subject.length > 0 ? (
+        {displayData.length > 0 ? (
           <FlatList
-            data={subject}
+            data={displayData}
             renderItem={({ item }) => (
               <TouchableOpacity
                 onPress={() =>
@@ -71,19 +117,24 @@ const PSubject = ({ navigation, user, token }: MyProps) => {
           />
         ) : (
           <View style={styles.flex}>
-            <TouchableOpacity
-              onPress={() => {
-                Linking.openURL(`${WEB_URL}/plans`);
-              }}
-            >
-              <Text style={styles.upgrade}>Upgrade to Premium</Text>
-            </TouchableOpacity>
+            {supportsInAppPurchase && !isPurchased ? (
+              // IAP mode — not yet purchased
+              <TouchableOpacity onPress={handleUpgrade}>
+                <Text style={styles.upgrade}>Upgrade to Premium</Text>
+              </TouchableOpacity>
+            ) : !supportsInAppPurchase ? (
+              // Non-IAP mode — API returned empty (not subscribed via Razorpay)
+              <TouchableOpacity onPress={handleUpgrade}>
+                <Text style={styles.upgrade}>Upgrade to Premium</Text>
+              </TouchableOpacity>
+            ) : null}
           </View>
         )}
       </View>
     </View>
   );
 };
+
 
 const styles = StyleSheet.create({
   container: {
@@ -105,14 +156,13 @@ const styles = StyleSheet.create({
     elevation: 1,
   },
   heading: {
-    // fontWeight: "bold",
     fontFamily: semi_bold,
-    fontSize: moderateScale(13)
+    fontSize: moderateScale(13),
   },
   subheading: {
     color: "#22bdc1",
     fontFamily: regular,
-    fontSize: moderateScale(12)
+    fontSize: moderateScale(12),
   },
   flex: {
     flex: 1,
@@ -129,6 +179,13 @@ const styles = StyleSheet.create({
     paddingRight: 20,
     borderRadius: 10,
     fontSize: moderateScale(16),
+    fontFamily: semi_bold,
+  },
+  noContent: {
+    fontSize: moderateScale(15),
+    fontFamily: regular,
+    color: "#777777",
+    textAlign: "center",
   },
 });
 

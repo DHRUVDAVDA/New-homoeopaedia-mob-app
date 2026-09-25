@@ -110,17 +110,17 @@ export default function App() {
     };
   }, []);
 
-  useEffect(() => {
-    CaptureProtection.prevent({
-      screenshot: true,
-      record: true,
-      appSwitcher: true,
-    });
+  // useEffect(() => {
+  //   CaptureProtection.prevent({
+  //     screenshot: true,
+  //     record: true,
+  //     appSwitcher: true,
+  //   });
 
-    return () => {
-      CaptureProtection.allow();
-    };
-  }, []);
+  //   return () => {
+  //     CaptureProtection.allow();
+  //   };
+  // }, []);
 
   // Load Fonts
   const [fontsLoaded] = useFonts({

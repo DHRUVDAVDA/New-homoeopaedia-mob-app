@@ -8,6 +8,7 @@ import {
   BackHandler,
 } from "react-native";
 import { connect } from "react-redux";
+import { useSelector } from "react-redux";
 import styles from "./Styles";
 import { User } from "../_redux/reducers/types";
 import axios from "axios";
@@ -34,6 +35,10 @@ const MockList = React.memo(({ navigation, user, token, tab }: MyProps) => {
   const [loading, setLoading] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [search, setSearch] = useState("");
+
+  // Purchase state from Redux
+  const isPurchased = useSelector((state: any) => state.purchaseReducer?.isPurchased ?? false);
+  const supportsInAppPurchase = useSelector((state: any) => state.purchaseReducer?.supportsInAppPurchase ?? false);
 
   const route = useRoute();
   // const tab = route.params?.tab || "All";
@@ -126,6 +131,15 @@ const MockList = React.memo(({ navigation, user, token, tab }: MyProps) => {
     }, [tab])
   );
 
+  /**
+   * Navigate to start/review a mock test.
+   *
+   * Gate logic:
+   * - supportsInAppPurchase = true  → check isPurchased ONLY (skip API entirely)
+   * - supportsInAppPurchase = false → ignore isPurchased, always use Razorpay API
+   *
+   * Only the "Not Started" (tab === "NotStarted") items are gated.
+   */
   const startOrReview = useCallback(
     async (
       title_id: number,
@@ -139,42 +153,63 @@ const MockList = React.memo(({ navigation, user, token, tab }: MyProps) => {
     ) => {
       setLoading(true);
 
-      try {
-        const res = await axios.get(
-          `${BASE_URL}/checksubscription/${user.user_id}/${title_id}?api_token=${token}`
-        );
-
-        if (res.data.success) {
-          if (ccount === 0 || status !== "completed")
-            status === ""
-              ? navigation.navigate("Instructions", {
-                  titleId: title_id,
-                  totalQues: qcount,
-                  title: title,
-                  status: status,
-                  duration: duration,
-                  start: start,
-                  end: end,
-                })
-              : navigation.navigate("StartMock", {
-                  titleId: title_id,
-                  totalQues: qcount,
-                  title: title,
-                  status: status,
-                  duration: duration,
-                  start: start,
-                  end: end,
-                  fromTab: tab,
-                });
-          else
-            navigation.navigate("MockResult", {
+      // Helper that performs the actual navigation once access is confirmed
+      const navigateToTest = () => {
+        if (ccount === 0 || status !== "completed") {
+          if (status === "") {
+            navigation.navigate("Instructions", {
               titleId: title_id,
               totalQues: qcount,
               title: title,
+              status: status,
               duration: duration,
               start: start,
               end: end,
             });
+          } else {
+            navigation.navigate("StartMock", {
+              titleId: title_id,
+              totalQues: qcount,
+              title: title,
+              status: status,
+              duration: duration,
+              start: start,
+              end: end,
+              fromTab: tab,
+            });
+          }
+        } else {
+          navigation.navigate("MockResult", {
+            titleId: title_id,
+            totalQues: qcount,
+            title: title,
+            duration: duration,
+            start: start,
+            end: end,
+          });
+        }
+      };
+
+      if (supportsInAppPurchase) {
+        // IAP path: only isPurchased matters — never call the subscription API
+        if (isPurchased) {
+          navigateToTest();
+        } else {
+          navigation.navigate("PaidService");
+        }
+        setLoading(false);
+        return;
+      }
+
+      // Razorpay / web-subscription path: isPurchased is irrelevant here
+      try {
+        const res = await axios.get(
+          `${BASE_URL}/checksubscription/${user.user_id}/${title_id}?api_token=${token}`
+        );
+console.log("subsss",res.data);
+
+        if (res.data.success) {
+          navigateToTest();
         } else {
           navigation.navigate("PaidService");
         }
@@ -184,9 +219,16 @@ const MockList = React.memo(({ navigation, user, token, tab }: MyProps) => {
 
       setLoading(false);
     },
-    [navigation]
+    [navigation, supportsInAppPurchase, isPurchased, user.user_id, token, tab]
   );
 
+  /**
+   * Re-attempt a completed mock test.
+   *
+   * Gate logic (same rule as startOrReview):
+   * - supportsInAppPurchase = true  → check isPurchased ONLY (skip API entirely)
+   * - supportsInAppPurchase = false → ignore isPurchased, always use Razorpay API
+   */
   const reAttempt = useCallback(
     async (
       title_id: number,
@@ -200,44 +242,58 @@ const MockList = React.memo(({ navigation, user, token, tab }: MyProps) => {
     ) => {
       setLoading(true);
 
+      // Helper that resets the attempt and navigates
+      const doReattempt = async () => {
+        try {
+          await axios.get(
+            `${BASE_URL}/mreattempt/${title_id}/${user.user_id}?api_token=${token}`
+          );
+          setLoading(false);
+          navigation.navigate("StartMock", {
+            titleId: title_id,
+            totalQues: qcount,
+            title: title,
+            status: status,
+            duration: duration,
+            start: start,
+            end: end,
+            fromTab: tab,
+          });
+        } catch (error) {
+          setLoading(false);
+          Toast.show("Network error. Try again.", Toast.LONG);
+        }
+      };
+
+      if (supportsInAppPurchase) {
+        // IAP path: only isPurchased matters — never call the subscription API
+        if (isPurchased) {
+          await doReattempt();
+        } else {
+          setLoading(false);
+          navigation.navigate("PaidService");
+        }
+        return;
+      }
+
+      // Razorpay / web-subscription path: isPurchased is irrelevant here
       try {
         const res = await axios.get(
           `${BASE_URL}/checksubscription/${user.user_id}/${title_id}?api_token=${token}`
         );
 
         if (res.data.success) {
-          await axios
-            .get(
-              `${BASE_URL}/mreattempt/${title_id}/${user.user_id}?api_token=${token}`
-            )
-            .then(
-              (res) => {
-                setLoading(false);
-
-                navigation.navigate("StartMock", {
-                  titleId: title_id,
-                  totalQues: qcount,
-                  title: title,
-                  status: status,
-                  duration: duration,
-                  start: start,
-                  end: end,
-                  fromTab: tab,
-                });
-              },
-              (error) => {
-                setLoading(false);
-                Toast.show("Network error. Try again.", Toast.LONG);
-              }
-            );
+          await doReattempt();
         } else {
+          setLoading(false);
           navigation.navigate("PaidService");
         }
       } catch (error) {
+        setLoading(false);
         Toast.show("Network error. Try again.", Toast.LONG);
       }
     },
-    [navigation, token, user.user_id]
+    [navigation, supportsInAppPurchase, isPurchased, token, user.user_id, tab]
   );
 
   const loadMore = useCallback(async () => {

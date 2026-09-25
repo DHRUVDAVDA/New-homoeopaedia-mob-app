@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { StyleSheet, View, FlatList, Text, Linking } from "react-native";
+import { StyleSheet, View, FlatList, Text } from "react-native";
 import Video from "../components/Video";
 import axios from "axios";
-import { BASE_URL, WEB_URL } from "../consts";
+import { BASE_URL } from "../consts";
 import { connect } from "react-redux";
 import Loading from "../layout/Loading";
 import Toast from "react-native-simple-toast";
@@ -11,111 +11,121 @@ import { TouchableOpacity } from "react-native-gesture-handler";
 import HeaderBack from "../layout/HeaderBack";
 import Footer from "../layout/Footer";
 import { moderateScale } from "react-native-size-matters";
+import usePurchase from "../hooks/usePurchase";
+import PremiumPurchaseModal from "../components/PremiumPurchaseModal";
 
 type MyProps = {
-	navigation: any;
-	user: User;
-	token: string;
-	route: any;
+  navigation: any;
+  user: User;
+  token: string;
+  route: any;
+  dispatch?: any;
 };
 
-const Paid = ({ navigation, user, token, route }: MyProps) => {
-	const { subject_id } = route.params;
-	const [video, setVideo] = useState([]);
-	const [loading, setLoading] = useState(true);
+const Paid = ({ navigation, user, token, route, dispatch }: MyProps) => {
+  const { subject_id } = route.params;
+  const [video, setVideo] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [modalVisible, setModalVisible] = useState(false);
 
-	useEffect(() => {
-		getVideo();
-	}, []);
+  const { triggerPurchase } = usePurchase();
 
-	const getVideo = () => {
-		axios
-			.get(
-				`${BASE_URL}/vimeoallnew/${subject_id}/${user.user_id}?api_token=${token}`,
-			)
-			.then(
-				(res) => {
-					setVideo(res.data.video);
-					setLoading(false);
-				},
-				(error) => {
-					setLoading(false);
-					Toast.show("Network error. Tryagain.", Toast.LONG);
-				},
-			);
-	};
+  useEffect(() => {
+    getVideo();
+  }, []);
 
-	return (
-		<View style={styles.container}>
-			<Loading loading={loading} text="Loading contents. Please wait." />
-			<HeaderBack navigation={navigation} heading="Videos" />
-			<View style={styles.content}>
-				{video.length > 0 ? (
-					<FlatList
-						data={video}
-						renderItem={({ item }) => (
-							<Video
-								navigation={navigation}
-								videos={item}
-								from="vimeo"
-							/>
-						)}
-						keyExtractor={(item) => `key${item.id}`}
-						numColumns={2}
-						showsVerticalScrollIndicator={false}
-					/>
-				) : (
-					<View style={styles.flex}>
-						<TouchableOpacity
-							onPress={() => {
-								Linking.openURL(`${WEB_URL}/plans`);
-							}}
-						>
-							<Text style={styles.upgrade}>
-								Upgrade to Premium
-							</Text>
-						</TouchableOpacity>
-					</View>
-				)}
-			</View>
-			<Footer navigation={navigation} page={`Video`} />
-		</View>
-	);
+  const getVideo = () => {
+    axios
+      .get(
+        `${BASE_URL}/vimeoallnew/${subject_id}/${user.user_id}?api_token=${token}`,
+      )
+      .then(
+        (res) => {
+          setVideo(res.data.video);
+          setLoading(false);
+        },
+        (error) => {
+          setLoading(false);
+          Toast.show("Network error. Tryagain.", Toast.LONG);
+        },
+      );
+  };
+
+  const handleUpgrade = () => {
+    triggerPurchase(() => setModalVisible(true));
+  };
+
+  return (
+    <View style={styles.container}>
+      <PremiumPurchaseModal
+        visible={modalVisible}
+        onClose={() => setModalVisible(false)}
+        onSuccess={() => getVideo()}
+        dispatch={dispatch}
+      />
+      <Loading loading={loading} text="Loading contents. Please wait." />
+      <HeaderBack navigation={navigation} heading="Videos" />
+      <View style={styles.content}>
+        {video.length > 0 ? (
+          <FlatList
+            data={video}
+            renderItem={({ item }) => (
+              <Video
+                navigation={navigation}
+                videos={item}
+                from="vimeo"
+              />
+            )}
+            keyExtractor={(item) => `key${item.id}`}
+            numColumns={2}
+            showsVerticalScrollIndicator={false}
+          />
+        ) : (
+          <View style={styles.flex}>
+            <TouchableOpacity onPress={handleUpgrade}>
+              <Text style={styles.upgrade}>Upgrade to Premium</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+      </View>
+      <Footer navigation={navigation} page={`Video`} />
+    </View>
+  );
 };
 
 const styles = StyleSheet.create({
-	container: {
-		flex: 1,
-		backgroundColor: "#ffffff",
-	},
-	content: {
-		margin: 20,
-		marginTop: 0,
-		marginBottom: 0,
-		flex: 1,
-	},
-	flex: {
-		flex: 1,
-		justifyContent: "center",
-		alignItems: "center",
-	},
-	upgrade: {
-		backgroundColor: "#22bdc1",
-		color: "#FFFFFF",
-		textAlign: "center",
-		paddingTop: 10,
-		paddingBottom: 10,
-		paddingLeft: 20,
-		paddingRight: 20,
-		borderRadius: 10,
-		fontSize: moderateScale(16),
-	},
+  container: {
+    flex: 1,
+    backgroundColor: "#ffffff",
+  },
+  content: {
+    margin: 20,
+    marginTop: 0,
+    marginBottom: 0,
+    flex: 1,
+  },
+  flex: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  upgrade: {
+    backgroundColor: "#22bdc1",
+    color: "#FFFFFF",
+    textAlign: "center",
+    paddingTop: 10,
+    paddingBottom: 10,
+    paddingLeft: 20,
+    paddingRight: 20,
+    borderRadius: 10,
+    fontSize: moderateScale(16),
+  },
 });
 
 const mapStateToProps = (state: any) => ({
-	isAuthenticated: state.authReducer.isAuthenticated,
-	user: state.authReducer.user,
-	token: state.authReducer.token,
+  isAuthenticated: state.authReducer.isAuthenticated,
+  user: state.authReducer.user,
+  token: state.authReducer.token,
 });
 
 export default connect(mapStateToProps)(Paid);

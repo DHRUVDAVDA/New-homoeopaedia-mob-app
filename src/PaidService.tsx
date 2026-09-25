@@ -1,116 +1,167 @@
-import React from "react";
-import { View, Text, Image, StyleSheet, Linking ,TouchableOpacity} from "react-native";
-import { WEB_URL } from "./consts";
+import React, { useState } from "react";
+import {
+  View,
+  Text,
+  Image,
+  StyleSheet,
+  TouchableOpacity,
+} from "react-native";
+import { connect } from "react-redux";
 import { moderateScale } from "react-native-size-matters";
+import { FontAwesome5 } from "@expo/vector-icons";
+import { theme_clr } from "./constants/colors";
+import { bold, regular, semi_bold } from "./constants/font";
+import usePurchase from "./hooks/usePurchase";
+import PremiumPurchaseModal from "./components/PremiumPurchaseModal";
 
 type MyProps = {
-	navigation: any;
+  navigation: any;
+  dispatch?: any;
 };
 
-const PaidService = ({ navigation }: MyProps) => {
-	return (
-		<View style={styles.container}>
-			<View style={styles.container}>
-				<Image
-					source={require("../assets/paid.jpg")}
-					style={styles.image}
-				/>
-				<View style={styles.p20}>
-					<Text style={styles.heading}>
-						This is a premium feature
-					</Text>
-					<Text style={styles.subheading}>
-						Get PREMIUM Plan now for unstoppable learning! Upgrade
-						your Medical PG prep with most competitive test series &
-						get:
-					</Text>
-					<Text style={styles.grey}>What you will get:</Text>
-					<View style={styles.p10}>
-						<Text style={styles.mb10}>
-							1. Most competitive mock tests ever.
-						</Text>
-						<Text style={styles.mb10}>
-							2. Latest exam pattern questions to relect the real
-							exam challenges.
-						</Text>
-						<Text style={styles.mb10}>
-							3. Solutions crafted with detailed explanations.
-						</Text>
-						<Text style={styles.mb10}>
-							4. Analytics designed to measure real-time
-							performance & progress.
-						</Text>
-						<Text style={styles.mb10}>
-							5. Freedom to attempt tests as per your comfort.
-						</Text>
-						<Text>
-							6. Attempt a live test when you feel fully prepared.
-						</Text>
-					</View>
-				</View>
-			</View>
-			<TouchableOpacity
-				style={styles.viewPlans}
-				onPress={() => {
-					Linking.openURL(`${WEB_URL}/plans`);
-				}}
-			>
-				<Text style={styles.viewText}>View Plans</Text>
-			</TouchableOpacity>
-			<TouchableOpacity onPress={() => navigation.goBack()}>
-				<Text style={styles.laterText}>MAYBE LATER</Text>
-			</TouchableOpacity>
-		</View>
-	);
+const PaidService = ({ navigation, dispatch }: MyProps) => {
+  const [modalVisible, setModalVisible] = useState(false);
+  const { isPurchased, triggerPurchase } = usePurchase();
+
+  const handleUpgrade = () => {
+    triggerPurchase(() => setModalVisible(true));
+  };
+
+  return (
+    <View style={styles.container}>
+      <PremiumPurchaseModal
+        visible={modalVisible}
+        onClose={() => setModalVisible(false)}
+        onSuccess={() => navigation.goBack()}
+        dispatch={dispatch}
+      />
+
+      <Image
+        source={require("../assets/paid.jpg")}
+        style={styles.image}
+      />
+
+      <View style={styles.content}>
+        <Text style={styles.heading}>Premium Feature</Text>
+        <Text style={styles.subheading}>
+          Upgrade to unlock all premium content and features.
+        </Text>
+
+        <View style={styles.benefitsList}>
+          {[
+            { icon: "clipboard-list", text: "Unlimited Mock Tests" },
+            { icon: "video", text: "Premium Video Lectures" },
+            { icon: "book-open", text: "Premium Study Material" },
+            { icon: "star", text: "Future Premium Features" },
+          ].map((b, i) => (
+            <View key={i} style={styles.benefitRow}>
+              <FontAwesome5
+                name={b.icon as any}
+                size={moderateScale(13)}
+                color={theme_clr}
+                style={styles.benefitIcon}
+              />
+              <Text style={styles.benefitText}>{b.text}</Text>
+            </View>
+          ))}
+        </View>
+
+        {isPurchased ? (
+          <View style={styles.purchasedBanner}>
+            <FontAwesome5 name="check-circle" size={moderateScale(18)} color="#27AE60" />
+            <Text style={styles.purchasedText}>  You already have Premium!</Text>
+          </View>
+        ) : (
+          <TouchableOpacity style={styles.upgradeBtn} onPress={handleUpgrade}>
+            <Text style={styles.upgradeBtnText}>Get Premium</Text>
+          </TouchableOpacity>
+        )}
+      </View>
+
+      <TouchableOpacity style={styles.laterBtn} onPress={() => navigation.goBack()}>
+        <Text style={styles.laterText}>MAYBE LATER</Text>
+      </TouchableOpacity>
+    </View>
+  );
 };
 
 const styles = StyleSheet.create({
-	container: {
-		flex: 1,
-	},
-	image: {
-		width: "100%",
-		height: 200,
-		resizeMode: "cover",
-	},
-	p20: {
-		padding: 20,
-	},
-	p10: {
-		padding: 10,
-	},
-	heading: {
-		fontSize: moderateScale(18),
-		fontWeight: "bold",
-		marginBottom: 10,
-	},
-	subheading: {
-		fontSize: moderateScale(16),
-		marginBottom: 10,
-	},
-	grey: {
-		fontSize: moderateScale(16),
-		color: "#555555",
-		marginBottom: 10,
-	},
-	mb10: {
-		marginBottom: 10,
-	},
-	viewPlans: {
-		backgroundColor: "#555555",
-		padding: 10,
-		borderRadius: 5,
-		margin: 20,
-	},
-	viewText: {
-		textAlign: "center",
-		color: "#ffffff",
-	},
-	laterText: {
-		textAlign: "center",
-		textDecorationLine: "underline",
-		marginBottom: 20,
-	},
+  container: {
+    flex: 1,
+    backgroundColor: "#FFFFFF",
+  },
+  image: {
+    width: "100%",
+    height: 200,
+    resizeMode: "cover",
+  },
+  content: {
+    flex: 1,
+    padding: 20,
+  },
+  heading: {
+    fontFamily: bold,
+    fontSize: moderateScale(20),
+    color: "#1A1A1A",
+    marginBottom: 6,
+  },
+  subheading: {
+    fontFamily: regular,
+    fontSize: moderateScale(14),
+    color: "#666666",
+    marginBottom: 20,
+  },
+  benefitsList: {
+    marginBottom: 28,
+  },
+  benefitRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 12,
+  },
+  benefitIcon: {
+    marginRight: 12,
+    width: 18,
+  },
+  benefitText: {
+    fontFamily: semi_bold,
+    fontSize: moderateScale(13),
+    color: "#333333",
+  },
+  upgradeBtn: {
+    backgroundColor: theme_clr,
+    padding: 15,
+    borderRadius: 10,
+    alignItems: "center",
+  },
+  upgradeBtnText: {
+    fontFamily: bold,
+    fontSize: moderateScale(15),
+    color: "#FFFFFF",
+  },
+  purchasedBanner: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 14,
+    backgroundColor: "#EAF9EF",
+    borderRadius: 10,
+  },
+  purchasedText: {
+    fontFamily: semi_bold,
+    fontSize: moderateScale(14),
+    color: "#27AE60",
+  },
+  laterBtn: {
+    paddingVertical: 14,
+    alignItems: "center",
+  },
+  laterText: {
+    fontFamily: regular,
+    fontSize: moderateScale(13),
+    textAlign: "center",
+    textDecorationLine: "underline",
+    color: "#888888",
+  },
 });
 
-export default PaidService;
+export default connect()(PaidService);
